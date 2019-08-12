@@ -1,19 +1,38 @@
+
 # Site settings
-name: Less Or More
-email: smh201411@163.com
-author: Huism
+
+# name 博客名称
+name: huism's  Blog
+# email 个人邮箱
+email: husm007@gmail.com
+
+author: huism
+
+# url 个人网站
 url: https://huism.github.io
-resume_site: http://www.hifreud.com/Resume.io/
+# github 个人的github主页
 github: https://github.com/huism/
-baseurl: "/"
-description: Actually, less is more!
-meta_description: 康志华;个人博客;学而不思则罔;思而不学则殆;生命不止;折腾不休
+
+# 项目根路径，不需修改
+baseurl: ""
+
+# resume_site 个人简历网站
+resume_site: "https://github.com/huism"
+
+# 首页描述
+description: 程序员的日子又少一天。。。
+
+# 我的书单的描述
+meta_description: 个人博客;学而不思则罔;思而不学则殆;生命不止;折腾不休
 motto: It's our wits that make us men.
 banner: 学而不思则罔，思而不学则殆。
 
 #permalink: /:categories/:year/:month/:day/:title/
 permalink: /:year/:month/:day/:title/
+plugins:
+  - jekyll-paginate
 paginate: 10
+
 
 exclude: ['README.md', 'Gemfile.lock', 'Gemfile', 'Rakefile']
 
@@ -22,5 +41,5 @@ github_username: huism
 # Build settings
 markdown: kramdown
 
-baidu_analysis: 94be4b0f9fc5d94cc0d0415ea6761ae9
+baidu_analysis: 
 
