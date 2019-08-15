@@ -166,7 +166,7 @@
 <h3 id="基本概念">基本概念</h3>
 <p>一个典型的Kafka集群包括若干生产者（Producer）、若干节点（Broker）和若干消费者（Consumer），以及一个Zookeeper集群。如下图所示：</p>
 
-<p><img src="/styles/images/kafka-cluster.jpg" alt="Kafka集群组成" /></p>
+<p><img src="/styles/images/kafka/kafka-cluster.jpg" alt="Kafka集群组成" /></p>
 
 <p>其中Zookeeper是Kafka负责集群元数据管理，控制器的选举等操作。Producer是将消息发送到Borker，Borker负责将消息存储到磁盘，而Consumer负责从Broker订阅消息数据。</p>
 
@@ -184,7 +184,7 @@
 <p>topic是一个逻辑概念，它可以细分成很多partition，一个partition只能属于一个topic，有时候称分区为主题分区（Topic-Partition）。分区在存储层面上可以看成一个可追加得日志，消息被追加到某个分区时会分配一个特定的偏移量（offset）。offset是消息在分区上的唯一标识，Kafka用offset保障消息在分区上的顺序性，但是offset不是跨分区的，在分区间消息是无序的。</p>
 
 <p>如下图所示，主题中有4个分区，消息被顺序追加到每个分区日志文件的尾部。
-<img src="/styles/images/kafka-topic-partition.png" alt="kafka解析主题-分区" /></p>
+<img src="/styles/images/kafka/kafka-topic-partition.png" alt="kafka解析主题-分区" /></p>
 
 <blockquote>
   <p><strong>注意</strong></p>
@@ -199,12 +199,12 @@
 </blockquote>
 
 <p>如下图所示，生产者和消费者对分区内偏移量的维护。
-<img src="/styles/images/kafka-consumer-partition.png" alt="分区内偏移量" /></p>
+<img src="/styles/images/kafka/kafka-consumer-partition.png" alt="分区内偏移量" /></p>
 
 <blockquote>
   <p>每一条消息被发送到broker之前，会根据分区规则选择存储到哪个具体的分区。如果分区规则设定得合理，所有的消息都可以均匀地分配到不同的分区中。</p>
 
-  <p>如果一个主题只对应一个文件，那么这个文件所在的机器 I/O 将会成为这个主题的性能瓶颈，而分区解决了这个问题 。</p>
+  <p>如果一个主题只对应一个文件，那么这个文件所在的机器 I/O 将会成为这个主题的性能瓶颈，而分区解决了这个问题。</p>
 
   <p>在创建主题的时候可以通过指定的参数来设置分区的个数，当然也可以在主题创建完成之后去修 改分区的数量，通过增加分区的数量可以实现水平扩展。</p>
 </blockquote>
@@ -224,7 +224,7 @@
 
 <p>如下图所示，Kafka集群中有4个broker，某个主题中有3个分区，且副本因子(即副本个数〉也为 3，如此每个分区便有1个 leader副本和 2个 follower副本 。生产者和消费者只与leader副本进行交互，而follow副本只负责消息的同步，很多时候follower副本中的消息相对leader副本而言会有一定的滞后。</p>
 
-<p><img src="https://img-blog.csdn.net/20160620014329074" alt="多副本架构" /></p>
+<p><img src="/styles/images/kafka/kafka-muti-part.png" alt="多副本架构" /></p>
 
 <blockquote>
   <p>分区中的所有副本统称为 AR ( Assigned Replicas)。所有与leader 副本保持一定程度同步的副本(包括leader副本在内）组成ISR (On-Sync Replicas)，ISR 集合是 AR 集合中的一个子集。</p>
@@ -245,98 +245,111 @@
 </blockquote>
 
 <h3 id="生产和消费初体验">生产和消费初体验</h3>
-<p><strong>终端体验</strong></p>
+<p><strong>终端初体验</strong></p>
 
 <p>创建一个名为<code class="highlighter-rouge">topic_name</code>的主题，并且该主题有4个分区，每个分区副本因子为3。</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># kafka-topic.sh --zookeeper node1:2181 --create --topic toptic_name --replication-factor 3 --partition 4
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># kafka-topic.sh --zookeeper node1:2181 --create --topic toptic_name --replication-factor 3 --partition 4</span>
 </code></pre></div></div>
 <p>展示主题<code class="highlighter-rouge">topic_name</code>的信息。</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># kafka-topic.sh --zookeeper node1:2181 --describe --topic topic_name
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># kafka-topic.sh --zookeeper node1:2181 --describe --topic topic_name</span>
 </code></pre></div></div>
 <p>创建消费者,并且消费主题<code class="highlighter-rouge">topic_name</code></p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># kafka-console-consumer.sh --bootstrap-server node1:9092 --topic topic_name
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># kafka-console-consumer.sh --bootstrap-server node1:9092 --topic topic_name</span>
 </code></pre></div></div>
 <p>创建生产者，并且生产消息到主题<code class="highlighter-rouge">topic_name</code></p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># kafka-console-producer.sh --broker-list node1:9092 --topic topic_name
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># kafka-console-producer.sh --broker-list node1:9092 --topic topic_name</span>
 
-&gt;hello world！    (输入消息，在消费者终端可以看到此输出)
-&gt;
+<span class="o">&gt;</span>hello world！    <span class="o">(</span>输入消息，在消费者终端可以看到此输出<span class="o">)</span>
+<span class="o">&gt;</span>
 </code></pre></div></div>
 
-<p><strong>IDE体验</strong></p>
+<p><strong>IDE初体验</strong></p>
 
-<ol>
-  <li>添加依赖
-Kafka的Java相关maven依赖：
-```</li>
-</ol>
-<dependency>
-    <groupid>org.apache.kafka</groupid>
-    <artifactid>kafka_clients</artifactid>    
-    <version>2.0.0</version>
-</dependency>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>2. 生产者
-生产者要往Kafka中写入消息。
-	* 首先要创建一个生产者客户端实例并设置一些配置参数。
-	* 然后构建消息的ProducerRecord对象，其中必须包含所要发往的主题及消息的消息体，进而再通过生产者客户端实例将消息发出。
-	* 最后可以通过close()方法来关闭生产者客户端实例并回收相应的资源。
+<p>1.添加依赖</p>
 
-</code></pre></div></div>
-<p>public class Producer{
-    public static void main(String[] args){
-        //生产者客户端配置
-        Properties prop = new Properties();
-        prop.put(“bootstrap-server”,”node1:9092”);
-        ….</p>
+<p>Kafka的Java相关maven依赖：</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    //创建生产者实例
-    KafkaProducer&lt;String,String&gt; producer = new new KafkaProducer&lt;&gt;(prop);
-    
-    //构建消息实体
-    ProducerRecord&lt;String,String&gt; record = new ProducerRecord&lt;&gt;(topic_name,"message");
-    
-    //发送消息
-    try{
-        producer.send(record);
-    }catch(Exception e){
-        e.printStackTrace();
-    }
-    
-    //关闭资源
-    producer.close();
-} } ``` 3. 消费者 消费者订阅主题消费消息：
-* 首先创建一个消费者客户端实例并配置相应的参数。
-* 然后订阅主题并消费即可。
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;dependency&gt;</span>
+    <span class="nt">&lt;groupid&gt;</span>org.apache.kafka<span class="nt">&lt;/groupid&gt;</span>
+    <span class="nt">&lt;artifactid&gt;</span>kafka_clients<span class="nt">&lt;/artifactid&gt;</span>    
+    <span class="nt">&lt;version&gt;</span>2.0.0<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
 </code></pre></div></div>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class Consumer{
-    public static void main(){
-        //消费者客户端配置
-        Properties prop = new Properties();
-        prop.put("bootstrap-server","node1:9092");
-        prop.put("group.id","group_name");
-        ....
+<p>2.生产者</p>
+
+<p>生产者要往Kafka中写入消息。</p>
+
+<ul>
+  <li>首先要创建一个生产者客户端实例并设置一些配置参数。</li>
+  <li>然后构建消息的ProducerRecord对象，其中必须包含所要发往的主题及消息的消息体，进而再通过生产者客户端实例将消息发出。</li>
+  <li>最后可以通过close()方法来关闭生产者客户端实例并回收相应的资源。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Producer</span><span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">){</span>
+        <span class="c1">//生产者客户端配置</span>
+        <span class="nc">Properties</span> <span class="n">prop</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Properties</span><span class="o">();</span>
+        <span class="n">prop</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"bootstrap-server"</span><span class="o">,</span><span class="s">"node1:9092"</span><span class="o">);</span>
+        <span class="o">....</span>
         
-        //创建消费者实例
-        KafkaConsumer&lt;String,String&gt; consumer = new new KafkaConsumer&lt;&gt;(prop);
+        <span class="c1">//创建生产者实例</span>
+        <span class="nc">KafkaProducer</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">producer</span> <span class="o">=</span> <span class="k">new</span> <span class="k">new</span> <span class="nc">KafkaProducer</span><span class="o">&lt;&gt;(</span><span class="n">prop</span><span class="o">);</span>
         
-        //订阅主题
-        consumer.subscribe(Collection.singletoList(topic_name));
+        <span class="c1">//构建消息实体</span>
+        <span class="nc">ProducerRecord</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">record</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ProducerRecord</span><span class="o">&lt;&gt;(</span><span class="n">topic_name</span><span class="o">,</span><span class="s">"message"</span><span class="o">);</span>
         
-        //循环消费消息
-        while(true){
-            ConsumerRecords&lt;String,String&gt; records = consumer.poll(Duration.ofMillis(1000));
-            for(ConsumerRecord&lt;String,String&gt; record : records){
-                System.out.println(record.value());
-            }
-        }
-    }
-}
+        <span class="c1">//发送消息</span>
+        <span class="k">try</span><span class="o">{</span>
+            <span class="n">producer</span><span class="o">.</span><span class="na">send</span><span class="o">(</span><span class="n">record</span><span class="o">);</span>
+        <span class="o">}</span><span class="k">catch</span><span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">){</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+        
+        <span class="c1">//关闭资源</span>
+        <span class="n">producer</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
 </code></pre></div></div>
+
+<p>3.消费者</p>
+
+<p>消费者订阅主题消费消息：</p>
+
+<ul>
+  <li>首先创建一个消费者客户端实例并配置相应的参数。</li>
+  <li>然后订阅主题并消费即可。</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Consumer</span><span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(){</span>
+        <span class="c1">//消费者客户端配置</span>
+        <span class="nc">Properties</span> <span class="n">prop</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Properties</span><span class="o">();</span>
+        <span class="n">prop</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"bootstrap-server"</span><span class="o">,</span><span class="s">"node1:9092"</span><span class="o">);</span>
+        <span class="n">prop</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"group.id"</span><span class="o">,</span><span class="s">"group_name"</span><span class="o">);</span>
+        <span class="o">....</span>
+        
+        <span class="c1">//创建消费者实例</span>
+        <span class="nc">KafkaConsumer</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">consumer</span> <span class="o">=</span> <span class="k">new</span> <span class="k">new</span> <span class="nc">KafkaConsumer</span><span class="o">&lt;&gt;(</span><span class="n">prop</span><span class="o">);</span>
+        
+        <span class="c1">//订阅主题</span>
+        <span class="n">consumer</span><span class="o">.</span><span class="na">subscribe</span><span class="o">(</span><span class="nc">Collection</span><span class="o">.</span><span class="na">singletoList</span><span class="o">(</span><span class="n">topic_name</span><span class="o">));</span>
+        
+        <span class="c1">//循环消费消息</span>
+        <span class="k">while</span><span class="o">(</span><span class="kc">true</span><span class="o">){</span>
+            <span class="nc">ConsumerRecords</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">records</span> <span class="o">=</span> <span class="n">consumer</span><span class="o">.</span><span class="na">poll</span><span class="o">(</span><span class="nc">Duration</span><span class="o">.</span><span class="na">ofMillis</span><span class="o">(</span><span class="mi">1000</span><span class="o">));</span>
+            <span class="k">for</span><span class="o">(</span><span class="nc">ConsumerRecord</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">record</span> <span class="o">:</span> <span class="n">records</span><span class="o">){</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">record</span><span class="o">.</span><span class="na">value</span><span class="o">());</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
 <h2 id="生产者">生产者</h2>
 
 <p>待续</p>
